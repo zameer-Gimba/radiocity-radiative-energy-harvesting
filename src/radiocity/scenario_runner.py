@@ -21,14 +21,7 @@ def load_scenarios(path: Path = SCENARIO_FILE) -> list[dict[str, Any]]:
 def run_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
     """Run one scenario through the baseline physical model."""
     channels = tuple(
-        RadiationChannel(
-            name=channel["name"],
-            incident_power_w_m2=channel["incident_power_w_m2"],
-            area_m2=channel["area_m2"],
-            capture_efficiency=channel["capture_efficiency"],
-            conversion_efficiency=channel["conversion_efficiency"],
-        )
-        for channel in scenario["channels"]
+        RadiationChannel(**channel) for channel in scenario["channels"]
     )
     system = SystemParameters(**scenario["system"])
     result = simulate_step(
