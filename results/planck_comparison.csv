@@ -1,0 +1,3 @@
+case,source_temperature_k,receiver_temperature_k,incident_power_w,captured_power_w,useful_power_w
+fixed,none,293.15,1000.000000,800.000000,200.000000
+thermal_1000K,1000.0,293.15,45223.097783,36178.478227,9044.619557
