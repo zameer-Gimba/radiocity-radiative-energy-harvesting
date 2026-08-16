@@ -20,9 +20,10 @@ class RadiationChannel:
         """Validate physical parameters."""
         if self.incident_power_w_m2 < 0 or self.area_m2 < 0:
             raise ValueError("Power density and area must be non-negative")
-        for value in (self.capture_efficiency, self.conversion_efficiency):
-            if not 0 <= value <= 1:
-                raise ValueError("Efficiencies must be between 0 and 1")
+        if not 0 <= self.capture_efficiency <= 1:
+            raise ValueError("Capture efficiency must be between 0 and 1")
+        if not 0 <= self.conversion_efficiency <= 1:
+            raise ValueError("Conversion efficiency must be between 0 and 1")
 
     @property
     def incident_power_w(self) -> float:
@@ -68,6 +69,33 @@ class SystemParameters:
             raise ValueError("maximum_temperature_k must exceed initial temperature")
 
 
+def _energy_step(
+    channels: tuple[RadiationChannel, ...],
+    system: SystemParameters,
+    storage_j: float,
+    dt_s: float,
+) -> Dict[str, float]:
+    """Calculate electrical energy flows for one timestep."""
+    incident_w = sum(c.incident_power_w for c in channels)
+    captured_w = sum(c.captured_power_w for c in channels)
+    useful_w = sum(c.useful_power_w for c in channels)
+    available_j = storage_j + useful_w * dt_s
+    delivered_j = min(available_j, system.load_power_w * dt_s)
+    post_load_j = available_j - delivered_j
+    return {
+        "incident_power_w": incident_w,
+        "captured_power_w": captured_w,
+        "useful_power_w": useful_w,
+        "capture_loss_w": max(0.0, incident_w - captured_w),
+        "conversion_loss_w": max(0.0, captured_w - useful_w),
+        "delivered_energy_j": delivered_j,
+        "storage_energy_j": min(post_load_j, system.storage_capacity_j),
+        "rejected_storage_energy_j": max(
+            0.0, post_load_j - system.storage_capacity_j
+        ),
+    }
+
+
 def simulate_step(
     channels: Iterable[RadiationChannel],
     system: SystemParameters,
@@ -79,44 +107,20 @@ def simulate_step(
     if dt_s <= 0:
         raise ValueError("dt_s must be positive")
 
-    channels = tuple(channels)
-    incident_w = sum(channel.incident_power_w for channel in channels)
-    captured_w = sum(channel.captured_power_w for channel in channels)
-    useful_w = sum(channel.useful_power_w for channel in channels)
-
-    load_energy_j = system.load_power_w * dt_s
-    available_j = storage_j + useful_w * dt_s
-    delivered_j = min(available_j, load_energy_j)
-    post_load_j = available_j - delivered_j
-    rejected_storage_j = max(0.0, post_load_j - system.storage_capacity_j)
-    storage_after_j = min(post_load_j, system.storage_capacity_j)
-
-    capture_loss_w = max(0.0, incident_w - captured_w)
-    conversion_loss_w = max(0.0, captured_w - useful_w)
+    energy = _energy_step(tuple(channels), system, storage_j, dt_s)
     thermal_loss_w = max(
         0.0,
         system.thermal_loss_coefficient_w_k * (temperature_k - 293.15),
     )
     temperature_after_k = temperature_k + (
-        (conversion_loss_w - thermal_loss_w) * dt_s
-        / system.thermal_capacity_j_k
+        (energy["conversion_loss_w"] - thermal_loss_w)
+        * dt_s / system.thermal_capacity_j_k
     )
-    thermal_rejection_w = max(
+    energy["temperature_k"] = temperature_after_k
+    energy["thermal_loss_w"] = thermal_loss_w
+    energy["thermal_rejection_w"] = max(
         0.0,
         (temperature_after_k - system.maximum_temperature_k)
         * system.thermal_capacity_j_k / dt_s,
     )
-
-    return {
-        "incident_power_w": incident_w,
-        "captured_power_w": captured_w,
-        "useful_power_w": useful_w,
-        "capture_loss_w": capture_loss_w,
-        "conversion_loss_w": conversion_loss_w,
-        "delivered_energy_j": delivered_j,
-        "storage_energy_j": storage_after_j,
-        "rejected_storage_energy_j": rejected_storage_j,
-        "temperature_k": temperature_after_k,
-        "thermal_loss_w": thermal_loss_w,
-        "thermal_rejection_w": thermal_rejection_w,
-    }
+    return energy
