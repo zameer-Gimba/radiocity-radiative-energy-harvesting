@@ -9,7 +9,7 @@ from radiocity.planck_model import net_band_radiative_flux
 
 
 def main() -> None:
-    """Sweep source temperature while enforcing a receiver temperature ceiling."""
+    """Sweep source temperature while enforcing a receiver heat ceiling."""
     output = Path(__file__).resolve().parents[1] / "results" / "thermal_ceiling_sweep.csv"
     output.parent.mkdir(exist_ok=True)
     receiver = 373.15
@@ -18,6 +18,9 @@ def main() -> None:
     conversion_efficiency = 0.25
     heat_rejection_w_m2 = 1_000.0
     sources = (400, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 5778)
+    max_electrical_w_m2 = (
+        heat_rejection_w_m2 * conversion_efficiency / (1.0 - conversion_efficiency)
+    )
 
     with output.open("w", encoding="utf-8") as file:
         file.write(
@@ -29,7 +32,7 @@ def main() -> None:
             captured = flux * area_m2 * capture_efficiency
             gross = captured * conversion_efficiency
             rejected = heat_rejection_w_m2 * area_m2
-            sustainable = min(gross, rejected * conversion_efficiency)
+            sustainable = min(gross, max_electrical_w_m2 * area_m2)
             file.write(
                 f"{source},{receiver},{flux:.6f},{captured:.6f},"
                 f"{gross:.6f},{rejected:.6f},{sustainable:.6f}\n"
