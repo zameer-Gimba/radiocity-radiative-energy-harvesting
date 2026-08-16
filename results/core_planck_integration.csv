@@ -1,0 +1,3 @@
+source_temperature_k,receiver_temperature_k,band_min_um,band_max_um,area_m2,capture_efficiency,conversion_efficiency,useful_power_w
+500.0,300.0,0.1,100.0,1.0,0.8,0.3,1322.8
+1000.0,300.0,0.1,100.0,1.0,0.8,0.3,13488.9
