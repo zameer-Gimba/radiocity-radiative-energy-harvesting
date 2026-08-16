@@ -1,0 +1,2 @@
+experiment,steps,dt_s,fixed_delivered_j,adaptive_delivered_j,improvement_percent,fixed_peak_temperature_k,adaptive_peak_temperature_k,fixed_spilled_j,adaptive_spilled_j
+thermally_coupled_spectral,12,10.0,1800.0,1800.0,0.0,299.2,299.2,4200.0,4200.0
