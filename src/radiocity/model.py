@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Iterable
 
+from radiocity.radiative_transfer import net_radiative_flux
+
 
 @dataclass(frozen=True)
 class RadiationChannel:
@@ -15,6 +17,9 @@ class RadiationChannel:
     area_m2: float
     capture_efficiency: float
     conversion_efficiency: float
+    source_temperature_k: float | None = None
+    emissivity: float = 1.0
+    view_factor: float = 1.0
 
     def __post_init__(self) -> None:
         """Validate physical parameters."""
@@ -24,21 +29,32 @@ class RadiationChannel:
             raise ValueError("Capture efficiency must be between 0 and 1")
         if not 0 <= self.conversion_efficiency <= 1:
             raise ValueError("Conversion efficiency must be between 0 and 1")
+        if not 0 <= self.emissivity <= 1:
+            raise ValueError("Emissivity must be between 0 and 1")
+        if not 0 <= self.view_factor <= 1:
+            raise ValueError("View factor must be between 0 and 1")
+        if self.source_temperature_k is not None and self.source_temperature_k <= 0:
+            raise ValueError("Source temperature must be positive")
 
-    @property
-    def incident_power_w(self) -> float:
-        """Return incident power in watts."""
-        return self.incident_power_w_m2 * self.area_m2
+    def incident_power(self, receiver_temperature_k: float) -> float:
+        """Return incident power, using net radiation when source temperature is set."""
+        if self.source_temperature_k is None:
+            return self.incident_power_w_m2 * self.area_m2
+        flux = net_radiative_flux(
+            self.source_temperature_k,
+            receiver_temperature_k,
+            self.emissivity,
+            self.view_factor,
+        )
+        return max(0.0, flux) * self.area_m2
 
-    @property
-    def captured_power_w(self) -> float:
-        """Return captured power in watts."""
-        return self.incident_power_w * self.capture_efficiency
+    def captured_power(self, receiver_temperature_k: float) -> float:
+        """Return captured radiative power."""
+        return self.incident_power(receiver_temperature_k) * self.capture_efficiency
 
-    @property
-    def useful_power_w(self) -> float:
-        """Return converted useful power in watts."""
-        return self.captured_power_w * self.conversion_efficiency
+    def useful_power(self, receiver_temperature_k: float) -> float:
+        """Return converted useful electrical power."""
+        return self.captured_power(receiver_temperature_k) * self.conversion_efficiency
 
 
 @dataclass(frozen=True)
@@ -76,9 +92,9 @@ def _energy_step(
     dt_s: float,
 ) -> Dict[str, float]:
     """Calculate electrical energy flows for one timestep."""
-    incident_w = sum(c.incident_power_w for c in channels)
-    captured_w = sum(c.captured_power_w for c in channels)
-    useful_w = sum(c.useful_power_w for c in channels)
+    incident_w = sum(c.incident_power(receiver_temperature_k=system.initial_temperature_k) for c in channels)
+    captured_w = sum(c.captured_power(system.initial_temperature_k) for c in channels)
+    useful_w = sum(c.useful_power(system.initial_temperature_k) for c in channels)
     available_j = storage_j + useful_w * dt_s
     delivered_j = min(available_j, system.load_power_w * dt_s)
     post_load_j = available_j - delivered_j
@@ -90,9 +106,7 @@ def _energy_step(
         "conversion_loss_w": max(0.0, captured_w - useful_w),
         "delivered_energy_j": delivered_j,
         "storage_energy_j": min(post_load_j, system.storage_capacity_j),
-        "rejected_storage_energy_j": max(
-            0.0, post_load_j - system.storage_capacity_j
-        ),
+        "rejected_storage_energy_j": max(0.0, post_load_j - system.storage_capacity_j),
     }
 
 
