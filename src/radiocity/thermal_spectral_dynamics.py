@@ -10,6 +10,7 @@ from radiocity.spectral_model import SpectralChannel
 @dataclass(frozen=True)
 class ThermalSpectralResult:
     """Comparison of fixed and feedback-controlled harvesting."""
+
     fixed_delivered_j: float
     adaptive_delivered_j: float
     fixed_peak_temperature_k: float
@@ -19,6 +20,7 @@ class ThermalSpectralResult:
 
     @property
     def improvement_percent(self) -> float:
+        """Return adaptive improvement over fixed capture."""
         if self.fixed_delivered_j == 0:
             return 0.0
         return 100.0 * (self.adaptive_delivered_j - self.fixed_delivered_j) / self.fixed_delivered_j
@@ -50,7 +52,6 @@ def run_thermal_feedback_experiment(
 
     for profile, load_w in zip(profiles, loads_w):
         load_j = max(0.0, load_w) * dt_s
-
         fixed_input_w = sum(c.useful_power(p, fixed_t) for c, p in profile)
         fixed_available = fixed_s + fixed_input_w * dt_s
         fixed_spilled += max(0.0, fixed_available - storage_capacity_j)
@@ -58,14 +59,23 @@ def run_thermal_feedback_experiment(
         fixed_delivered += min(fixed_available, load_j)
         fixed_s = max(0.0, fixed_available - load_j)
         fixed_heat_w = max(0.0, sum(p for _, p in profile) - fixed_input_w)
-        fixed_t += (fixed_heat_w - thermal_loss_w_k * (fixed_t - ambient_temperature_k)) * dt_s / thermal_capacity_j_k
+        fixed_t += (
+            fixed_heat_w - thermal_loss_w_k * (fixed_t - ambient_temperature_k)
+        ) * dt_s / thermal_capacity_j_k
         fixed_t = max(ambient_temperature_k, fixed_t)
         fixed_peak = max(fixed_peak, fixed_t)
 
-        ranked = sorted(profile, key=lambda item: item[0].useful_power(item[1], adaptive_t), reverse=True)
+        ranked = sorted(
+            profile,
+            key=lambda item: item[0].useful_power(item[1], adaptive_t),
+            reverse=True,
+        )
         adaptive_input_w = 0.0
         for channel, incident_w in ranked:
-            if adaptive_t >= 0.90 * maximum_temperature_k and channel.conversion_efficiency < 0.25:
+            if (
+                adaptive_t >= 0.90 * maximum_temperature_k
+                and channel.conversion_efficiency < 0.25
+            ):
                 continue
             adaptive_input_w += channel.useful_power(incident_w, adaptive_t)
 
@@ -75,8 +85,17 @@ def run_thermal_feedback_experiment(
         adaptive_delivered += min(adaptive_available, load_j)
         adaptive_s = max(0.0, adaptive_available - load_j)
         adaptive_heat_w = max(0.0, sum(p for _, p in profile) - adaptive_input_w)
-        adaptive_t += (adaptive_heat_w - thermal_loss_w_k * (adaptive_t - ambient_temperature_k)) * dt_s / thermal_capacity_j_k
+        adaptive_t += (
+            adaptive_heat_w - thermal_loss_w_k * (adaptive_t - ambient_temperature_k)
+        ) * dt_s / thermal_capacity_j_k
         adaptive_t = max(ambient_temperature_k, adaptive_t)
         adaptive_peak = max(adaptive_peak, adaptive_t)
 
-    return ThermalSpectralResult(fixed_delivered, adaptive_delivered, fixed_peak, adaptive_peak, fixed_spilled, adaptive_spilled)
+    return ThermalSpectralResult(
+        fixed_delivered,
+        adaptive_delivered,
+        fixed_peak,
+        adaptive_peak,
+        fixed_spilled,
+        adaptive_spilled,
+    )
