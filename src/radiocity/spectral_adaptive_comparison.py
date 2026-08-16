@@ -21,7 +21,11 @@ class SpectralAdaptiveResult:
         """Return adaptive improvement over fixed capture."""
         if self.fixed_delivered_j == 0:
             return 0.0
-        return 100.0 * (self.adaptive_delivered_j - self.fixed_delivered_j) / self.fixed_delivered_j
+        return (
+            100.0
+            * (self.adaptive_delivered_j - self.fixed_delivered_j)
+            / self.fixed_delivered_j
+        )
 
 
 def run_spectral_adaptive_experiment(
