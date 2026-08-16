@@ -1,0 +1,2 @@
+experiment,storage_capacity_j,dt_s,fixed_delivered_j,adaptive_delivered_j,improvement_percent,fixed_spilled_j,adaptive_spilled_j
+constrained_multisource,300.0,10.0,600.0,600.0,0.0,4200.0,4200.0
