@@ -1,0 +1,4 @@
+temperature_k,planck_integral_w_m2,stefan_boltzmann_w_m2,relative_error
+300.0,459.300,459.300,0.0000
+500.0,3543.984,3543.984,0.0000
+1000.0,56703.744,56703.744,0.0000
