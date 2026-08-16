@@ -9,6 +9,8 @@ from radiocity.spectral_model import SpectralChannel
 
 @dataclass(frozen=True)
 class SpectralAdaptiveResult:
+    """Results from a temperature-aware spectral experiment."""
+
     fixed_delivered_j: float
     adaptive_delivered_j: float
     fixed_spilled_j: float
@@ -16,6 +18,7 @@ class SpectralAdaptiveResult:
 
     @property
     def improvement_percent(self) -> float:
+        """Return adaptive improvement over fixed capture."""
         if self.fixed_delivered_j == 0:
             return 0.0
         return 100.0 * (self.adaptive_delivered_j - self.fixed_delivered_j) / self.fixed_delivered_j
@@ -42,8 +45,10 @@ def run_spectral_adaptive_experiment(
 
     for profile, temperature_k, load_w in zip(profiles, temperatures_k, loads_w):
         load_j = max(0.0, load_w) * dt_s
-
-        fixed_input = sum(channel.useful_power(power_w, temperature_k) for channel, power_w in profile) * dt_s
+        fixed_input = sum(
+            channel.useful_power(power_w, temperature_k)
+            for channel, power_w in profile
+        ) * dt_s
         available = fixed_storage + fixed_input
         fixed_spilled += max(0.0, available - storage_capacity_j)
         available = min(storage_capacity_j, available)
@@ -52,11 +57,12 @@ def run_spectral_adaptive_experiment(
 
         thermal_fraction = temperature_k / 373.15
         adaptive_input = 0.0
-        for channel, power_w in sorted(
+        ranked = sorted(
             profile,
             key=lambda item: item[0].useful_power(item[1], temperature_k),
             reverse=True,
-        ):
+        )
+        for channel, power_w in ranked:
             if thermal_fraction >= adaptive_threshold_fraction and channel.conversion_efficiency < 0.2:
                 continue
             adaptive_input += channel.useful_power(power_w, temperature_k)
@@ -67,4 +73,9 @@ def run_spectral_adaptive_experiment(
         adaptive_delivered += min(available, load_j)
         adaptive_storage = max(0.0, available - load_j)
 
-    return SpectralAdaptiveResult(fixed_delivered, adaptive_delivered, fixed_spilled, adaptive_spilled)
+    return SpectralAdaptiveResult(
+        fixed_delivered,
+        adaptive_delivered,
+        fixed_spilled,
+        adaptive_spilled,
+    )
