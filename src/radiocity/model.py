@@ -37,7 +37,7 @@ class RadiationChannel:
             raise ValueError("Source temperature must be positive")
 
     def incident_power(self, receiver_temperature_k: float) -> float:
-        """Return incident power, using net radiation when source temperature is set."""
+        """Return incident power using net exchange for thermal channels."""
         if self.source_temperature_k is None:
             return self.incident_power_w_m2 * self.area_m2
         flux = net_radiative_flux(
@@ -89,12 +89,13 @@ def _energy_step(
     channels: tuple[RadiationChannel, ...],
     system: SystemParameters,
     storage_j: float,
+    temperature_k: float,
     dt_s: float,
 ) -> Dict[str, float]:
     """Calculate electrical energy flows for one timestep."""
-    incident_w = sum(c.incident_power(receiver_temperature_k=system.initial_temperature_k) for c in channels)
-    captured_w = sum(c.captured_power(system.initial_temperature_k) for c in channels)
-    useful_w = sum(c.useful_power(system.initial_temperature_k) for c in channels)
+    incident_w = sum(c.incident_power(temperature_k) for c in channels)
+    captured_w = sum(c.captured_power(temperature_k) for c in channels)
+    useful_w = sum(c.useful_power(temperature_k) for c in channels)
     available_j = storage_j + useful_w * dt_s
     delivered_j = min(available_j, system.load_power_w * dt_s)
     post_load_j = available_j - delivered_j
@@ -121,7 +122,7 @@ def simulate_step(
     if dt_s <= 0:
         raise ValueError("dt_s must be positive")
 
-    energy = _energy_step(tuple(channels), system, storage_j, dt_s)
+    energy = _energy_step(tuple(channels), system, storage_j, temperature_k, dt_s)
     thermal_loss_w = max(
         0.0,
         system.thermal_loss_coefficient_w_k * (temperature_k - 293.15),
