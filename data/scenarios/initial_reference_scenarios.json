@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "purpose": "Initial physically grounded reference scenarios for Portfolio A",
+    "units": "SI",
+    "note": "Values are model inputs, not claims about universal environmental availability. Solar reference uses 1000 W/m2 standard test irradiance."
+  },
+  "scenarios": [
+    {
+      "name": "solar_reference",
+      "description": "Reference terrestrial solar irradiance condition",
+      "channels": [
+        {
+          "name": "solar",
+          "incident_power_w_m2": 1000.0,
+          "area_m2": 1.0,
+          "capture_efficiency": 0.90,
+          "conversion_efficiency": 0.25
+        }
+      ]
+    },
+    {
+      "name": "thermal_300K_blackbody",
+      "description": "Idealized blackbody surface at 300 K before geometric and atmospheric losses",
+      "channels": [
+        {
+          "name": "thermal_ir",
+          "incident_power_w_m2": 459.27,
+          "area_m2": 1.0,
+          "capture_efficiency": 0.90,
+          "conversion_efficiency": 0.10
+        }
+      ]
+    },
+    {
+      "name": "thermal_500K_blackbody",
+      "description": "Idealized blackbody surface at 500 K before geometric and atmospheric losses",
+      "channels": [
+        {
+          "name": "thermal_ir",
+          "incident_power_w_m2": 3543.75,
+          "area_m2": 1.0,
+          "capture_efficiency": 0.90,
+          "conversion_efficiency": 0.10
+        }
+      ]
+    },
+    {
+      "name": "multi_spectral_reference",
+      "description": "Illustrative combined solar and thermal channels",
+      "channels": [
+        {
+          "name": "solar",
+          "incident_power_w_m2": 1000.0,
+          "area_m2": 1.0,
+          "capture_efficiency": 0.90,
+          "conversion_efficiency": 0.25
+        },
+        {
+          "name": "thermal_ir",
+          "incident_power_w_m2": 459.27,
+          "area_m2": 1.0,
+          "capture_efficiency": 0.90,
+          "conversion_efficiency": 0.10
+        }
+      ]
+    }
+  ]
+}
