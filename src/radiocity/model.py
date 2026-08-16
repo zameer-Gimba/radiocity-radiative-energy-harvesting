@@ -1,11 +1,11 @@
-"""Initial physical energy-balance model for Portfolio A."""
+"""Physics-grounded energy-balance model for Portfolio A."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict, Iterable
 
-from radiocity.radiative_transfer import net_radiative_flux
+from radiocity.planck_model import net_band_radiative_flux
 
 
 @dataclass(frozen=True)
@@ -20,6 +20,8 @@ class RadiationChannel:
     source_temperature_k: float | None = None
     emissivity: float = 1.0
     view_factor: float = 1.0
+    wavelength_min_m: float = 1e-7
+    wavelength_max_m: float = 1e-4
 
     def __post_init__(self) -> None:
         """Validate physical parameters."""
@@ -29,22 +31,23 @@ class RadiationChannel:
             raise ValueError("Capture efficiency must be between 0 and 1")
         if not 0 <= self.conversion_efficiency <= 1:
             raise ValueError("Conversion efficiency must be between 0 and 1")
-        if not 0 <= self.emissivity <= 1:
-            raise ValueError("Emissivity must be between 0 and 1")
-        if not 0 <= self.view_factor <= 1:
-            raise ValueError("View factor must be between 0 and 1")
+        if not 0 <= self.emissivity <= 1 or not 0 <= self.view_factor <= 1:
+            raise ValueError("Emissivity and view factor must be between 0 and 1")
         if self.source_temperature_k is not None and self.source_temperature_k <= 0:
             raise ValueError("Source temperature must be positive")
+        if self.wavelength_min_m <= 0 or self.wavelength_max_m <= self.wavelength_min_m:
+            raise ValueError("Invalid wavelength band")
 
     def incident_power(self, receiver_temperature_k: float) -> float:
-        """Return incident power using net exchange for thermal channels."""
+        """Return incident power from a thermal source or specified flux."""
         if self.source_temperature_k is None:
             return self.incident_power_w_m2 * self.area_m2
-        flux = net_radiative_flux(
+        flux = net_band_radiative_flux(
+            self.wavelength_min_m,
+            self.wavelength_max_m,
             self.source_temperature_k,
             receiver_temperature_k,
-            self.emissivity,
-            self.view_factor,
+            self.emissivity * self.view_factor,
         )
         return max(0.0, flux) * self.area_m2
 
@@ -121,7 +124,6 @@ def simulate_step(
     """Advance the model by one constant-condition time step."""
     if dt_s <= 0:
         raise ValueError("dt_s must be positive")
-
     energy = _energy_step(tuple(channels), system, storage_j, temperature_k, dt_s)
     thermal_loss_w = max(
         0.0,
