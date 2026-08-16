@@ -1,0 +1,2 @@
+experiment,steps,dt_s,initial_temperature_k,maximum_temperature_k,thermal_capacity_j_k,thermal_loss_w_k,storage_capacity_j,load_w,fixed_delivered_j,adaptive_delivered_j,improvement_percent,fixed_peak_temperature_k,adaptive_peak_temperature_k
+thermal_limit_stress,120,10.0,360.0,373.15,500.0,0.05,2000.0,100.0,120000.0,120000.0,0.0,373.15,373.15
