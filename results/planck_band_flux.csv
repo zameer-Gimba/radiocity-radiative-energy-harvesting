@@ -1,0 +1,5 @@
+source_temperature_k,receiver_temperature_k,band_min_um,band_max_um,net_flux_w_m2
+300.0,293.15,1.0,30.0,45.1
+500.0,293.15,1.0,30.0,1164.7
+1000.0,293.15,1.0,30.0,56132.8
+5778.0,293.15,0.3,3.0,12703000.0
