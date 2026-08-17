@@ -2,7 +2,12 @@ name: Tests and Radiocity Experiments
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   test-and-experiments:
@@ -29,6 +34,8 @@ jobs:
           exit "$status"
       - name: Run TPV temperature-bandgap map
         if: success()
+        env:
+          PYTHONPATH: src
         run: python scripts/tpv_temperature_bandgap_map.py
       - name: Upload diagnostics
         if: always()
