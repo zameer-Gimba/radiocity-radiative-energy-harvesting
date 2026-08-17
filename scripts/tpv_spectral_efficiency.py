@@ -36,11 +36,13 @@ def main() -> None:
         wavelength = low + index * step
         flux = max(0.0, hemispherical_spectral_exitance(wavelength, source) - hemispherical_spectral_exitance(wavelength, receiver))
         efficiency = conversion_efficiency(wavelength)
-        average_flux = 0.5 * (previous_flux + flux) * step * capture
+        absorbed_interval = 0.5 * (previous_flux + flux) * step * capture
         average_efficiency = 0.5 * (previous_efficiency + efficiency)
-        absorbed += average_flux
-        gross += average_flux * average_efficiency
-        rejected += average_flux * (1.0 - average_efficiency)
+        converted_interval = absorbed_interval * average_efficiency
+        rejected_interval = absorbed_interval - converted_interval
+        absorbed += absorbed_interval
+        gross += converted_interval
+        rejected += rejected_interval
         previous_flux = flux
         previous_efficiency = efficiency
 
