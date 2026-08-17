@@ -14,6 +14,8 @@ def spectral_radiance(wavelength_m: float, temperature_k: float) -> float:
     if wavelength_m <= 0 or temperature_k <= 0:
         raise ValueError("Wavelength and temperature must be positive")
     exponent = PLANCK_CONSTANT * LIGHT_SPEED / (wavelength_m * BOLTZMANN_CONSTANT * temperature_k)
+    if exponent > 700.0:
+        return 0.0
     return 2.0 * PLANCK_CONSTANT * LIGHT_SPEED**2 / wavelength_m**5 / (exp(exponent) - 1.0)
 
 
