@@ -19,13 +19,25 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
           python -m pip install pytest
-      - name: Run test suite
+      - name: Run test suite with diagnostics
         env:
           PYTHONPATH: src
-        run: pytest -q
+        run: |
+          set +e
+          python -m pytest -vv --tb=long 2>&1 | tee pytest.log
+          status=${PIPESTATUS[0]}
+          exit "$status"
       - name: Run TPV temperature-bandgap map
+        if: success()
         run: python scripts/tpv_temperature_bandgap_map.py
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radiocity-ci-diagnostics
+          path: pytest.log
       - name: Upload TPV map
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: tpv-temperature-bandgap-map
