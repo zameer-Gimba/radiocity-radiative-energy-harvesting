@@ -73,4 +73,4 @@ The next model revision should use:
 - Fiorino, A., et al. (2018). Nanogap near-field thermophotovoltaics. *Nature Nanotechnology, 13*, 806–811.
 - Fan, D., et al. (2020). Near-perfect photon utilization in an air-bridge thermophotovoltaic cell. *Nature, 586*, 237–241.
 
-These references are starting points for the formal literature review; the paper should later use the agreed APA style consistently.
+These references are starting points for the formal literature review; the paper would later use APA style.
