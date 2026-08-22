@@ -41,7 +41,3 @@ References are added as the repository develops. Literature-derived equations, a
 5. National Renewable Energy Laboratory (NREL). Standard solar photovoltaic test-condition documentation.
 
    **Use in project:** Reference irradiance conditions and photovoltaic testing context. The exact document used for a numerical parameter will be recorded when that parameter enters the model.
-
-## Reference Maintenance Rule
-
-Whenever a new external source materially influences the model, add it here **before or alongside the corresponding implementation/documentation change**. The future paper bibliography should be generated from this working reference base and independently checked before submission.
