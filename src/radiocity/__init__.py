@@ -1,29 +1,41 @@
-"""Radiocity radiative-energy harvesting models."""
+"""Radiocity: energy autonomy from invisible energy.
 
-from .adaptive_controller import ControlLimits, allocate_capture, optimize_and_allocate, rank_channels
-from .ai_optimization import OptimizationResult, optimize_spectral_channel
-from .dynamic_sources import DynamicSourceProfile, SourceState
-from .emr_model import EMRChannel
-from .energy_repository import EnergyRepository
-from .intelligent_simulation import IntelligentSimulationResult, run_intelligent_simulation
-from .model import RadiationChannel, SystemParameters, simulate_step
-from .multi_source import harvest_multi_source
+Harvest sunlight, heat, radio waves and beamed power; store and regulate it;
+spend it wisely - for anything from a sensor to a car to a factory machine.
+"""
+
+from .devices import CATALOGUE
+from .harvesters import (
+    InductiveLink,
+    LaserBeam,
+    Rectenna,
+    RFBeam,
+    SolarPV,
+    Thermoelectric,
+    Thermophotovoltaic,
+)
+from .loads import Load
+from .scenarios import build_conditions, load_climate, load_history
+from .simulation import Device, compare_policies, simulate
+from .storage import Storage, lithium_ion, supercapacitor
 
 __all__ = [
-    "ControlLimits",
-    "DynamicSourceProfile",
-    "EMRChannel",
-    "EnergyRepository",
-    "IntelligentSimulationResult",
-    "OptimizationResult",
-    "RadiationChannel",
-    "SourceState",
-    "SystemParameters",
-    "allocate_capture",
-    "harvest_multi_source",
-    "optimize_and_allocate",
-    "optimize_spectral_channel",
-    "rank_channels",
-    "run_intelligent_simulation",
-    "simulate_step",
+    "CATALOGUE",
+    "Device",
+    "InductiveLink",
+    "LaserBeam",
+    "Load",
+    "RFBeam",
+    "Rectenna",
+    "SolarPV",
+    "Storage",
+    "Thermoelectric",
+    "Thermophotovoltaic",
+    "build_conditions",
+    "compare_policies",
+    "lithium_ion",
+    "load_climate",
+    "load_history",
+    "simulate",
+    "supercapacitor",
 ]
