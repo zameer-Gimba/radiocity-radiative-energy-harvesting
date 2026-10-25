@@ -97,7 +97,8 @@ def page_explorer() -> None:
     st.title("Radiocity Energy Autonomy Explorer")
     st.caption(
         "How much of a device's energy can invisible energy supply - sunlight, radio waves, "
-        "waste heat and beamed power - over a full year of real weather (NASA POWER, 2024)?"
+        "waste heat and beamed power? Calculated hour by hour over all of 2024 using real NASA weather "
+        "for each city."
     )
 
     with st.sidebar:
@@ -117,7 +118,8 @@ def page_explorer() -> None:
         storage_scale = st.slider("Storage capacity (× default)", 0.25, 3.0, 1.0, 0.25)
         policy = st.radio("Energy management", ["smart", "reserve", "basic"], horizontal=True)
         ai = st.toggle("AI day-ahead solar forecast", value=False, disabled=policy != "smart",
-                       help="LightGBM trained on 2019-2023, used for the smart policy's reserve.")
+                       help="An AI that predicts tomorrow's sunshine (learned from 2019-2023 weather), so the power "
+                            "manager knows how much energy to save tonight.")
 
     with st.spinner("Simulating 8,784 hours..."):
         hourly, summary, kinds = run(city, rf_environment, device_name, tuple(sorted(options.items())),
@@ -218,32 +220,70 @@ def page_limits() -> None:
                + " the ICNIRP public exposure limit (10 W/m²).")
 
 
-def page_about() -> None:
-    st.title("About Radiocity")
+def page_how_we_know() -> None:
+    st.title("How we know")
     st.markdown(
         """
-**Vision.** Energy autonomy from invisible energy: every device carries receivers that capture
-sunlight, radio waves, waste heat and beamed power; an intelligent power system stores it,
-regulates it (stop-when-full, protection) and spends it wisely (critical needs first, save for later).
+These numbers are **calculated, not invented**, and you can check every one:
 
-**What the results show** (2024 weather, four Nigerian cities):
+- **Real weather.** Every hour of 2024 for Abuja, Lagos, Kano and Port Harcourt, measured and published by NASA.
+- **Standard physics.** The same textbook equations engineers use for solar panels, antennas, heat engines and
+  wireless chargers - each one cited in the code and documentation.
+- **Open and repeatable.** The code is public; one command recalculates every result from scratch.
+- **Checked against independent sources.** The table below compares Radiocity's own numbers with exact laws of
+  physics, the European Commission's official solar calculator (PVGIS) and published laboratory records.
+"""
+    )
+    path = ROOT / "results" / "validation.csv"
+    if path.exists():
+        table = pd.read_csv(path)[["check", "radiocity", "reference", "difference"]]
+        table.columns = ["Check", "Radiocity", "Independent reference", "Difference"]
+        st.table(table.set_index("Check"))
+    st.markdown(
+        """
+**Solar check in plain words:** for a 1 kW solar installation, Radiocity predicts 4-7% *less* yearly energy
+than the European Commission's calculator in every city - it does not exaggerate. Most of that small gap is
+because 2024 was a less sunny year than the 2005-2023 average the calculator uses.
 
-- Sensors are fully powered by a small solar cell - ambient energy is already enough.
-- A compact electric car's 5 m² solar skin supplies ~21-28 km of driving per day (≈40-50% of a 40 km commute);
-  ambient radio adds essentially nothing; electrified lanes close the gap.
-- Phones get ~12-17% from back-of-phone solar; short-range wireless power supplies the rest.
-- Machinery beside a 1500 K furnace can run entirely on recovered heat.
-- An AI day-ahead forecast (LightGBM) is 20-30% more accurate than simple baselines on an unseen year.
-
-All figures are simulation results under documented assumptions - see the repository's
-`docs/MODEL.md` and `results/RESULTS.md`.
-
-**Author:** Muhammad Ibrahim Gimba · [GitHub](https://github.com/zameer-Gimba/radiocity-radiative-energy-harvesting)
+**Next step - real hardware.** A small solar panel, battery and energy logger, measured for a few weeks in
+Abuja and compared with Radiocity's prediction for the same days. The guide and comparison script are in the
+repository (`docs/FIELD_TEST.md`).
 """
     )
 
 
-pages = {"Explorer": page_explorer, "Physics check": page_limits, "About": page_about}
+def page_about() -> None:
+    st.title("About Radiocity")
+    st.markdown(
+        """
+**The vision.** Devices that power themselves from invisible energy - sunlight, radio waves, heat from
+machines, and energy beamed to them wirelessly. Each device carries receivers; a smart power system stores
+the energy, stops charging when full, keeps a reserve for what matters most, and uses surplus while it is free.
+
+**What we found** (every hour of 2024, four Nigerian cities):
+
+- **Sensors** run entirely on a solar cell about 1-2 cm² in size.
+- **Phones** get about 12-16% of their daily energy from a solar back; a bedside wireless pad covers the rest.
+- **A compact electric car** with 5 m² of solar skin drives about **20-27 km per day on sunlight alone** -
+  roughly 40-50% of a 40 km daily commute. Radio waves add almost nothing; electrified road lanes close the gap.
+- **Machines beside a hot furnace** can run entirely on the recovered heat.
+- **Smart planning helps:** on a deliberately undersized sensor, the smart power manager kept it running every
+  single day, where a simple controller failed on about 2-3% of days.
+
+**About the AI.** To plan how much energy to save, the power manager needs a guess of tomorrow's sunshine.
+The simple rule is "tomorrow will be like today". Our AI learned from five years of past weather and was then
+tested on 2024, a year it had never seen. In Abuja its guesses were off by about 9% on average; the best simple
+rule was off by 11%. Across the four cities, the AI's mistakes were 20-30% smaller.
+
+See **How we know** for how these numbers are checked.
+
+**Author:** Muhammad Ibrahim Gimba ·
+[GitHub](https://github.com/zameer-Gimba/radiocity-radiative-energy-harvesting)
+"""
+    )
+
+
+pages = {"Explorer": page_explorer, "Physics check": page_limits, "How we know": page_how_we_know, "About": page_about}
 with st.sidebar:
     choice = st.radio("Page", list(pages), horizontal=True, label_visibility="collapsed")
     st.divider()

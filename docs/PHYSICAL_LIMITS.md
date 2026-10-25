@@ -18,7 +18,7 @@ Everything else - materials, cost, manufacturing, regulation, infrastructure - i
 
 | Source | Power arriving | Realistic electrical output | Fits |
 |---|---|---|---|
-| Sunlight | ≈1000 W/m² peak; 4.2-5.8 kWh/m²/day in Nigerian cities (NASA POWER 2024) | ≈150-200 W/m² peak, ≈0.8-1.1 kWh/m²/day | sensors to vehicles (partly) |
+| Sunlight | ≈1000 W/m² peak; 4.2-5.8 kWh/m²/day in Nigerian cities (NASA POWER 2024) | ≈150-200 W/m² peak, ≈0.8-1.0 kWh/m²/day | sensors to vehicles (partly) |
 | Ambient radio (urban, away from transmitters) | ≈10⁻⁵-10⁻³ W/m² | nanowatts to microwatts per antenna; rectifiers lose most of it at low power | only ultra-low-power tags, or near transmitters |
 | Waste heat (furnace 1500 K) | ≈290 kW/m² blackbody | tens of kW/m² with thermophotovoltaics (≈38% of absorbed heat in Radiocity's model; 40% measured at ≈2400 K by LaPotin et al., 2022) | industrial machinery |
 | Body heat / ambient heat | net flux only across small temperature differences | microwatts to milliwatts | wearables |
@@ -29,8 +29,8 @@ Everything else - materials, cost, manufacturing, regulation, infrastructure - i
 ## What this means for the vision
 
 - **Small devices** (sensors, tags): ambient energy is already enough - fully autonomous today.
-- **Phones and wearables**: ambient solar gives ≈12-17% in Radiocity's simulations; short-range beamed power gives the rest.
-- **Cars**: a 5 m² solar skin gives ≈21-28 km/day in Nigerian cities - about 40-50% of a 40 km commute. Ambient radio adds essentially nothing (milliwatt-hours per year). Electrified lanes or wireless pads close the gap.
+- **Phones and wearables**: ambient solar gives ≈12-16% in Radiocity's simulations; short-range beamed power gives the rest.
+- **Cars**: a 5 m² solar skin gives ≈20-27 km/day in Nigerian cities - about 40-50% of a 40 km commute. Ambient radio adds essentially nothing (milliwatt-hours per year). Electrified lanes or wireless pads close the gap.
 - **Indoor machines**: almost no sunlight indoors; beamed power or waste heat is required.
 - **Hot-process machinery**: waste heat can fully power co-located equipment.
 

@@ -6,7 +6,9 @@ Radiocity is an engine for powering devices - from sensors and phones to cars an
 
 For any device, in any place, it answers: *how much of this device's energy can invisible energy supply - with which receivers, how much storage, and which management policy?*
 
-→ Vision and company path: [docs/VISION.md](docs/VISION.md)  ·  What physics allows: [docs/PHYSICAL_LIMITS.md](docs/PHYSICAL_LIMITS.md)  ·  Full results: [results/RESULTS.md](results/RESULTS.md)
+**Live app:** https://radiocity.streamlit.app/
+
+→ Vision and company path: [docs/VISION.md](docs/VISION.md)  ·  What physics allows: [docs/PHYSICAL_LIMITS.md](docs/PHYSICAL_LIMITS.md)  ·  Full results: [results/RESULTS.md](results/RESULTS.md)  ·  How it is checked: [results/VALIDATION.md](results/VALIDATION.md)
 
 ---
 
@@ -16,21 +18,29 @@ Full-year simulations on real 2024 hourly weather (NASA POWER) for Abuja, Lagos,
 
 | Device | Invisible energy available | Energy autonomy |
 |---|---|---|
-| Outdoor IoT sensor | 5×5 cm solar cell + radio | **100%** in all four cities - a ~1-2 cm² cell is the minimum-cost design |
-| Smartphone | back-of-phone solar + radio | **12-17%** |
+| Outdoor IoT sensor | 5×5 cm solar cell + radio | **100%** in all four cities - a ~1-2 cm² cell is enough |
+| Smartphone | back-of-phone solar + radio | **12-16%** |
 | Smartphone | + bedside wireless pad | **100%** |
-| Compact electric car (40 km/day) | 5 m² solar skin + radio antenna array | **39-52%** - the skin supplies **21-28 km of driving per day** |
+| Compact electric car (40 km/day) | 5 m² solar skin + radio antenna array | **38-50%** - the skin supplies **20-27 km of driving per day** |
 | Compact electric car | + electrified road lanes | **100%** |
 | Indoor warehouse robot | skylight solar / + station charging pads | **0.5%** / **100%** |
 | Machine beside a 1500 K furnace | thermophotovoltaic + thermoelectric heat recovery | **100%** |
 
 - **Ambient radio waves are far too weak to power anything above microwatt sensors**: a 200-antenna array on a car harvests milliwatt-hours per *year* at typical urban levels. That is the inverse-square law, not an engineering gap.
 - **Beamed power is what closes the gap** for phones, robots and vehicles. A complete invisible-energy system combines ambient, waste-heat and beamed sources under one manager.
-- **Smart energy management matters**: on an undersized sensor in Lagos and Port Harcourt, the forecast-driven manager keeps critical loads at 100% and every day fully autonomous, where a basic controller misses 1.4-2.7% of days and a fixed-reserve controller sheds loads daily.
-- **AI forecasting**: a LightGBM day-ahead solar forecast trained on 2019-2023 is **20-30% more accurate** than the best simple baseline on unseen 2024 data in every city. (A system-level benefit over the simpler smart policy is not yet demonstrated.)
+- **Smart energy management matters**: on an undersized sensor in Lagos and Port Harcourt, the forecast-driven manager keeps critical loads at 100% and every day fully autonomous, where a basic controller fails on 2-3% of days and a fixed-reserve controller sheds loads daily.
+- **AI forecasting**: to decide how much to save, the manager guesses tomorrow's sunshine. An AI model (LightGBM) trained on 2019-2023 weather and tested on 2024 - a year it never saw - makes **20-30% smaller mistakes** than the best simple rule ("tomorrow like today, adjusted for season") in every city; e.g. off by 9% on average in Abuja versus 11%. On the cases tested so far, the simpler rule was already good enough for 100% uptime, so the AI's extra accuracy has not yet changed an outcome.
 - **Heat-to-electricity design**: the efficiency-optimal thermophotovoltaic bandgap rises linearly with source temperature (≈0.38 eV per 1000 K); particle swarm optimisation finds it to within 0.01 eV of an exhaustive search.
 
-All figures are simulation results under the assumptions in [docs/MODEL.md](docs/MODEL.md), not measured device performance.
+### How these numbers are checked
+
+Calculated hour by hour from **real NASA weather data** with **standard, cited physics**; the code is open and `python scripts/run_experiments.py` recalculates everything. Independent checks ([results/VALIDATION.md](results/VALIDATION.md)):
+
+- Radiation physics matches the Stefan-Boltzmann law exactly.
+- Yearly solar yield is **4-7% below** the European Commission's PVGIS calculator in all four cities (conservative; most of the gap is 2024 being less sunny than PVGIS's 2005-2023 average).
+- Heat-to-electricity efficiency (37.8%) sits just under the 40% laboratory record (LaPotin et al., 2022); wireless-pad efficiency (89%) meets the SAE J2954 target.
+
+Next: a real-hardware field test - [docs/FIELD_TEST.md](docs/FIELD_TEST.md).
 
 ## What's inside
 
@@ -50,8 +60,9 @@ All figures are simulation results under the assumptions in [docs/MODEL.md](docs
 
 ```bash
 pip install -r requirements-dev.txt
-pytest                                  # 36 tests, incl. hour-by-hour energy conservation
+pytest                                  # 41 tests, incl. hour-by-hour energy conservation
 python scripts/run_experiments.py       # regenerate results/ (~4 min)
+python scripts/validate.py              # independent checks -> results/VALIDATION.md
 streamlit run streamlit_app.py          # Energy Autonomy Explorer
 ```
 
