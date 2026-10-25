@@ -1,52 +1,60 @@
-# Radiocity — Adaptive Multi-Spectral Radiative Energy Harvesting
+# Radiocity — Intelligent Multi-Source Radiative Energy Harvesting
 
-Research repository for investigating whether heterogeneous electromagnetic and thermal radiation can be adaptively captured, converted, stored, and routed as useful energy within physically and thermodynamically defensible limits.
+Radiocity is a research codebase investigating the coordinated harvesting, conversion, storage, management, and distribution of energy from heterogeneous radiative sources under physical and engineering constraints.
 
-## Research Status
+**Research specification:** [docs/RESEARCH_SPECIFICATION.md](docs/RESEARCH_SPECIFICATION.md)  
+**AI/optimization architecture:** [docs/AI_OPTIMIZATION_ARCHITECTURE.md](docs/AI_OPTIMIZATION_ARCHITECTURE.md)  
+**Experiment status and evidence labels:** [docs/EXPERIMENT_STATUS.md](docs/EXPERIMENT_STATUS.md)  
+**Computational model:** [docs/COMPUTATIONAL_MODEL_SPECIFICATION.md](docs/COMPUTATIONAL_MODEL_SPECIFICATION.md)
 
-**Stage:** Research specification and theoretical development
+## Research question
 
-**Portfolio:** A — Radiative Energy Harvesting
+Can physics-constrained spectral optimization and adaptive energy management improve useful delivered energy, load availability, storage use, or thermal stability when radiative source conditions change?
 
-## Core Research Question
+## Current prototype
 
-Can an adaptive multi-spectral energy architecture recover useful energy from different radiative sources more effectively than conventional single-spectrum or independently operated harvesting systems?
+- Planck-based thermal/radiative modelling and spectral operating-window optimization.
+- LightGBM surrogate trained on physics-generated samples.
+- PSO search over bounded spectral operating variables.
+- Physics-model validation of candidate thermal operating points.
+- Simplified RF/microwave EMR harvesting and conversion pathway.
+- Common finite-capacity energy repository and load allocation.
+- Dynamic synthetic thermal and RF input profiles.
+- Simulation history for harvested power, delivered energy, unmet load, repository energy, and state of charge.
 
-## Research Direction
+## Important implementation boundary
 
-The project investigates:
+The dynamic profile can also represent solar irradiance, but a solar/PV conversion channel is **not yet integrated end-to-end** in the intelligent simulation. Solar is part of the intended architecture, not a completed conversion pathway in the current prototype.
 
-- Solar electromagnetic radiation
-- Thermal infrared radiation and waste heat
-- Ambient RF and microwave energy
-- Spectral capture and conversion
-- Energy storage and routing
-- Adaptive control
-- Thermal and energy constraints
+Likewise, the current system is a computational prototype. It does not physically actuate filters or near-field gaps, and it does not yet implement an NF-TPV device model or reinforcement learning. Ambient RF contribution depends strongly on actual power density, antenna area, frequency, and rectifier efficiency.
 
-## Scientific Position
-
-This project does not assume universal radiation capture, unlimited energy extraction, or energy creation. All proposed mechanisms must satisfy conservation of energy, thermodynamic laws, realistic power densities, conversion losses, and material constraints.
-
-## Method
-
-**Physics → Mathematics → Simulation → Evidence → Experimental Proposal**
-
-## Repository Structure
+## Computational flow
 
 ```text
-.
-├── docs/
-│   └── RESEARCH_SPECIFICATION.md
-├── mathematics/
-├── simulation/
-├── results/
-└── references/
+Dynamic thermal conditions → LightGBM surrogate → PSO
+                           → physics validation → thermal harvesting ┐
+Dynamic RF conditions → RF/EMR conversion model ─────────────────────┤
+                                                                    ↓
+                                                     finite energy repository
+                                                                    ↓
+                                                   load allocation and metrics
 ```
 
-## Long-Term Direction
+## Scientific method
 
-The research may eventually contribute to adaptive radiative-energy harvesting systems, ambient-energy-powered devices, intelligent energy management, and experimental work in advanced materials and photonic systems.
+**Physics → numerical checks → simulation → baseline comparison → sensitivity analysis → evidence-based conclusions.**
+
+Synthetic scenarios enable controlled tests; they are not real-world performance evidence. A model trained on physics-generated data is a surrogate of those model assumptions, not independent empirical validation. All quantitative claims must disclose assumptions, source conditions, constraints, and validation status.
+
+## Key documentation
+
+- [Research specification](docs/RESEARCH_SPECIFICATION.md)
+- [AI and optimization architecture](docs/AI_OPTIMIZATION_ARCHITECTURE.md)
+- [Computational model specification](docs/COMPUTATIONAL_MODEL_SPECIFICATION.md)
+- [Research model policy](docs/RESEARCH_MODEL_POLICY.md)
+- [Experiment status](docs/EXPERIMENT_STATUS.md)
+- [Physics audit](docs/PHYSICS_AUDIT.md)
+- [References](docs/REFERENCES.md)
 
 ## Author
 
