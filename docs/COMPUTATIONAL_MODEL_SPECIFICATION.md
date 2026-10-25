@@ -1,190 +1,142 @@
 # Computational Model Specification
 
-## Portfolio A — Adaptive Multi-Spectral Radiative Energy Harvesting
+## Radiocity — Portfolio A: Adaptive Multi-Source Radiative Energy Harvesting
 
 ## 1. Purpose
 
-Define the first reproducible computational model for evaluating the proposed adaptive multi-spectral radiative-energy harvesting architecture.
+Specify a reproducible computational framework for evaluating whether source-specific radiation harvesting, physics-constrained spectral optimization, finite storage, and adaptive load allocation can improve useful energy delivery under changing inputs.
 
-The model will determine whether combining multiple radiative sources and dynamically routing their captured energy can provide measurable benefits over independent harvesting pathways.
+## 2. Source classes and current maturity
 
-## 2. Model Inputs
+### Thermal / infrared
 
-The simulation will initially represent:
+Input variables include source temperature, incident thermal power density, collector area, emissivity, view factor, conversion efficiency, and spectral operating limits. The current prototype applies a Planck/radiative physics model and optimizes a bounded spectral window. Its assumptions and validation status must be reported.
 
-- Solar spectral irradiance
-- Thermal radiation from environmental or waste-heat sources
-- Ambient RF/microwave power density
-- Collector area
-- Spectral absorption response
-- Conversion efficiency by spectral pathway
-- Storage capacity
-- Storage state
-- Load demand
-- Maximum allowable system temperature
-- Thermal losses
-- Electrical conversion/storage losses
+### RF / microwave
 
-## 3. Spectral Channels
+Input variables include frequency, power density, effective antenna area, capture efficiency, and conversion efficiency. The current `EMRChannel` is a simplified RF/EMR conversion abstraction. It is not a detailed electromagnetic antenna, impedance-matching, or nonlinear rectifier simulation.
 
-### Optical / Solar
+### Solar / optical
 
-Primary model quantity:
+The intended pathway requires wavelength-dependent solar irradiance, optical capture, and a suitable PV or solar-thermal conversion model. The dynamic profile can hold solar irradiance, but the intelligent simulation does not yet convert it to electrical output. Treat this pathway as planned until integrated and tested.
 
-`S_solar(lambda, t)` — incident solar spectral power density.
+### Near-field thermal radiation / NF-TPV
 
-Candidate conversion pathway: photovoltaic and/or solar-thermal conversion.
+This is a future extension requiring a suitable near-field radiative-transfer model, material optical properties, gap geometry, spectral transmission, and device thermal balance. It is not represented by the current far-field/thermal channel alone.
 
-### Thermal Infrared
+## 3. Dynamic inputs
 
-Primary model quantity:
+A deterministic source profile provides values as functions of time:
 
-`P_thermal(t)` — radiative power available from a thermal source.
+- thermal source temperature, (T_s(t));
+- thermal incident power density, (G_{th}(t));
+- RF power density, (S_{RF}(t));
+- optional solar irradiance field, (G_{solar}(t)).
 
-Candidate conversion pathway: thermal-to-electric conversion or thermal storage.
+Synthetic profiles support reproducible stress tests. Literature or measured profiles should be added with source citations, units, temporal resolution, and preprocessing notes before making real-world claims.
 
-### RF / Microwave
+## 4. Energy-flow accounting
 
-Primary model quantity:
+For a modelled channel (i), captured power may be represented as
 
-`S_RF(f, t)` — incident RF power density as a function of frequency and time.
+[
+P_{capture,i}(t)=A_iint alpha_i(x,t)S_i(x,t),dx
+]
 
-Candidate conversion pathway: antenna capture and rectification.
+where (A_i) is effective collection area, (alpha_i) is a capture/absorption response, and (S_i) is incident spectral power density. For a broadband scalar input, the model must document how the spectral integral is represented or approximated.
 
-## 4. Core Energy Model
+Useful converted power is
 
-For each channel `i`, captured power is represented as:
+[
+P_{useful,i}(t)=eta_i(t)P_{capture,i}(t)
+]
 
-`P_capture,i(t) = A_i * integral[alpha_i(x,t) * S_i(x,t) dx]`
+with pathway-specific efficiency and losses. The common repository stores already-converted energy; it does not make the conversion pathways physically equivalent.
 
-where:
+For a time step (Delta t), an idealized energy balance is
 
-- `A_i` is effective collection area;
-- `alpha_i` is the spectral capture/absorption response;
-- `S_i` is incident spectral power density;
-- `x` is wavelength or frequency as appropriate.
+[
+E_{t+1}=min{E_{max},max[0,E_t+E_{accepted,t}-E_{delivered,t}-E_{loss,t}]}.
+]
 
-Useful converted power is:
+Any energy clipped by capacity, rejected during charging, or lost in conversion/storage must be recorded separately for a valid energy balance.
 
-`P_useful,i(t) = eta_i(t) * P_capture,i(t)`
+## 5. Thermal constraint
 
-where `eta_i` represents the complete conversion efficiency of that pathway.
+The long-term model should distinguish source temperature from receiver/device temperature. A lumped thermal balance may be expressed as
 
-Total useful input to the energy reservoir is:
+[
+C_{th}rac{dT}{dt}=P_{absorbed}-P_{converted}-P_{rejected},
+]
 
-`P_in(t) = sum(P_useful,i(t))`
+where rejected heat can include radiation, convection, conduction, and other documented pathways. A configured maximum temperature is a constraint, not a complete thermal-dynamics model by itself.
 
-## 5. Energy Reservoir
+## 6. LightGBM and PSO
 
-Stored energy evolves according to:
+LightGBM approximates useful-power outputs generated by the existing physics model. Training samples must be reproducible, and the surrogate must be evaluated on held-out samples using MAE/RMSE or other suitable metrics before claiming accuracy.
 
-`dE/dt = P_in(t) - P_load(t) - P_loss(t)`
+PSO searches bounded thermal spectral operating variables. Every proposed candidate should be re-evaluated by the physics model, with infeasible candidates rejected. Compare PSO with a grid search or other transparent baseline, record seeds and convergence, and report surrogate-predicted and physics-validated power separately.
 
-with the constraint:
+The current simulation retrains the surrogate inside optimization calls and responds to the current state. It is not yet a trained temporal forecasting system.
 
-`0 <= E(t) <= E_max`
+## 7. Repository and load allocation
 
-The model must prevent storage overcharge and must account for conversion and storage losses.
+The current architecture stores harvested thermal and RF energy in a common finite-capacity repository and distributes energy to requested loads. Evaluation should include:
 
-## 6. Thermal Model
+- storage capacity and initial state;
+- charging and discharging efficiency;
+- maximum charge/discharge power;
+- load priority policy;
+- delivered and unmet energy;
+- curtailed/rejected energy;
+- source attribution and conservation checks.
 
-The system temperature will be represented initially by a lumped thermal model:
+Some of these are not yet fully represented; they are requirements for the next verification and refinement stage, not claims of current completeness.
 
-`C_th * dT/dt = P_absorbed(t) - P_removed(t)`
+## 8. Baselines and experimental design
 
-where:
+Compare, at minimum:
 
-- `C_th` is effective thermal capacitance;
-- `P_absorbed` is incoming absorbed radiation;
-- `P_removed` includes useful thermal conversion, radiation, convection, and other modeled heat removal.
+1. Thermal channel with a fixed spectral window.
+2. Thermal channel with LightGBM + PSO optimization.
+3. Multi-source harvesting with fixed thermal settings.
+4. Multi-source harvesting with adaptive thermal optimization.
 
-The principal safety constraint is:
+Use identical source trajectories, time steps, loads, initial storage, capacities, and constraints. Include single-source ablations to determine the marginal contribution of RF and, after implementation, solar/PV. Repeat stochastic optimization across seeds.
 
-`T(t) <= T_max`
+## 9. Metrics
 
-## 7. Adaptive Controller
+- incident, captured, converted, stored, and delivered energy;
+- pathway-specific useful power;
+- overall efficiency with an explicit denominator;
+- unmet load and energy curtailment;
+- storage state and bound violations;
+- peak temperature and time above constraints;
+- PSO convergence and runtime;
+- LightGBM held-out prediction error;
+- performance difference versus fixed baselines;
+- sensitivity to uncertain physical parameters.
 
-The controller will determine the operating state of each harvesting pathway using:
+## 10. Validation stages
 
-- incident spectral intensity;
-- system temperature;
-- storage state of charge;
-- load demand;
-- conversion efficiency;
-- pathway availability.
+1. Unit-test physical equations and numerical limits.
+2. Verify energy conservation on simple cases with analytically expected outcomes.
+3. Test each conversion channel independently.
+4. Test repository charge/discharge and capacity edge cases.
+5. Verify dynamic source updates.
+6. Compare PSO against grid search and fixed policies.
+7. Run baseline and ablation experiments.
+8. Add sourced realistic profiles and uncertainty analysis.
+9. Only then draw system-level research conclusions.
 
-Possible control actions include:
+## 11. Reproducibility
 
-- increase capture;
-- decrease capture;
-- redirect energy;
-- store energy;
-- reject/reflect excess radiation;
-- prioritize a more efficient conversion pathway.
+Use documented assumptions, fixed random seeds, versioned code, machine-readable inputs and outputs, reproducible scripts, and a recorded commit for each reported experiment. Mark whether evidence is synthetic, literature-anchored, measured, or experimentally validated.
 
-## 8. Baseline Comparisons
+## 12. Scientific rule
 
-The adaptive architecture will be compared against:
+Maintain the distinction:
 
-1. Single-spectrum harvesting.
-2. Fixed multi-spectrum harvesting without adaptive control.
-3. Adaptive multi-spectrum harvesting.
+**incident radiation → captured energy → converted energy → accepted/stored energy → delivered energy**
 
-The comparison will use identical incident-energy scenarios wherever possible.
-
-## 9. Primary Evaluation Metrics
-
-- Total incident energy
-- Captured energy
-- Converted useful energy
-- Overall conversion efficiency
-- Storage utilization
-- Energy supplied to load
-- Thermal peak
-- Time within safe thermal limits
-- Energy rejected
-- System availability
-
-## 10. Simulation Stages
-
-### Stage 1 — Deterministic model
-
-Use controlled synthetic radiation profiles to verify equations and energy conservation.
-
-### Stage 2 — Realistic source profiles
-
-Introduce realistic solar, thermal, and RF ranges from literature and authoritative datasets.
-
-### Stage 3 — Adaptive control
-
-Implement the routing/controller and compare against the fixed baselines.
-
-### Stage 4 — Sensitivity analysis
-
-Determine which physical parameters most strongly influence performance.
-
-### Stage 5 — Feasibility analysis
-
-Identify operating regimes where the architecture provides meaningful benefit and regimes where it does not.
-
-## 11. Reproducibility Requirements
-
-All simulations must use:
-
-- Python;
-- documented assumptions;
-- versioned source code;
-- fixed random seeds where stochastic methods are used;
-- machine-readable input parameters;
-- saved simulation outputs;
-- reproducible figures and tables.
-
-## 12. Scientific Rule
-
-The computational model must distinguish clearly between:
-
-`incident energy → captured energy → converted energy → stored energy → delivered energy`
-
-No stage may be treated as automatically lossless.
-
-The first implementation should favor physical transparency over model complexity.
+No stage is assumed lossless. The shared repository is an accounting and storage abstraction, not a claim of a universal physical radiation collector.
