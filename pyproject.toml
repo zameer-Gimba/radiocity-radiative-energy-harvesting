@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "radiocity"
 version = "0.1.0"
-description = "Radiative energy harvesting simulation and thermal modeling"
+description = "Physics-constrained multi-source radiative energy harvesting, optimization, storage, and distribution simulation"
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",
