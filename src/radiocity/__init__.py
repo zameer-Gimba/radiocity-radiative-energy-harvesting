@@ -2,22 +2,28 @@
 
 from .adaptive_controller import ControlLimits, allocate_capture, optimize_and_allocate, rank_channels
 from .ai_optimization import OptimizationResult, optimize_spectral_channel
+from .dynamic_sources import DynamicSourceProfile, SourceState
 from .emr_model import EMRChannel
 from .energy_repository import EnergyRepository
+from .intelligent_simulation import IntelligentSimulationResult, run_intelligent_simulation
 from .model import RadiationChannel, SystemParameters, simulate_step
 from .multi_source import harvest_multi_source
 
 __all__ = [
     "ControlLimits",
+    "DynamicSourceProfile",
     "EMRChannel",
     "EnergyRepository",
+    "IntelligentSimulationResult",
     "OptimizationResult",
     "RadiationChannel",
+    "SourceState",
     "SystemParameters",
     "allocate_capture",
     "harvest_multi_source",
     "optimize_and_allocate",
     "optimize_spectral_channel",
     "rank_channels",
+    "run_intelligent_simulation",
     "simulate_step",
 ]
