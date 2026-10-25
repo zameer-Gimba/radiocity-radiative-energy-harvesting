@@ -1,76 +1,57 @@
-# Physics Audit: Radiative Energy Harvesting
+# Physical Limits and Open Frontiers
 
-## Purpose
+What invisible energy can and cannot do, so Radiocity aims at everything that is possible and nothing that is not.
 
-This audit establishes the physical boundaries that the Radiocity model must respect before optimization or engineering claims are made.
+## Laws no design can break
 
-## 1. Radiation is not a universal extractable energy reservoir
+| Law | What it means for Radiocity |
+|---|---|
+| **Conservation of energy** | A receiver collects at most *(arriving power per m²) × (area) × (efficiency)*. No coating, material or algorithm creates energy. |
+| **Second law of thermodynamics** | Heat radiation is only useful across a temperature difference. An object at the same temperature as its surroundings receives no net energy from them. Heat-to-electricity is bounded by the Carnot efficiency 1 − T_cold/T_hot. |
+| **Inverse-square law** | Power from a transmitter spreads over 4πd². Ambient radio power far from transmitters is therefore tiny, and beamed power falls fast with distance unless the beam is focused (antenna gain, lasers). |
+| **Antenna aperture** | An antenna captures power over an effective area A_e = Gλ²/4π - small at high frequencies (≈20 cm² for a 2.45 GHz dipole). |
+| **Detailed balance (Shockley–Queisser)** | Photovoltaic conversion is bounded: ≈33% for one junction under sunlight, ≈47% achieved with multi-junction cells in the lab. |
 
-A receiver can absorb electromagnetic radiation only when there is a net radiative energy flux into it. For thermal radiation, the net exchange depends on the source and receiver states, spectra, view factors, and optical properties. A blackbody is an ideal absorber/emitter, not an unlimited energy source.
+Everything else - materials, cost, manufacturing, regulation, infrastructure - is engineering, and engineering can be beaten.
 
-## 2. Blackbody emission
+## Ceilings per energy source (orders of magnitude)
 
-For an ideal blackbody, total hemispherical emitted power is
+| Source | Power arriving | Realistic electrical output | Fits |
+|---|---|---|---|
+| Sunlight | ≈1000 W/m² peak; 4.2-5.8 kWh/m²/day in Nigerian cities (NASA POWER 2024) | ≈150-200 W/m² peak, ≈0.8-1.1 kWh/m²/day | sensors to vehicles (partly) |
+| Ambient radio (urban, away from transmitters) | ≈10⁻⁵-10⁻³ W/m² | nanowatts to microwatts per antenna; rectifiers lose most of it at low power | only ultra-low-power tags, or near transmitters |
+| Waste heat (furnace 1500 K) | ≈290 kW/m² blackbody | tens of kW/m² with thermophotovoltaics (≈38% of absorbed heat in Radiocity's model; 40% measured at ≈2400 K by LaPotin et al., 2022) | industrial machinery |
+| Body heat / ambient heat | net flux only across small temperature differences | microwatts to milliwatts | wearables |
+| Beamed: inductive pads / electrified lanes | as designed (kW-tens of kW) | ≈85-95% link efficiency at close range | robots, cars |
+| Beamed: microwave | as transmitted, falls with d² | limited by beam size and human-exposure limits (ICNIRP: 10 W/m² public, 2-300 GHz) | devices at metres; drones/space with large apertures |
+| Beamed: laser | as transmitted | ≈50% laser-to-electric photovoltaics; needs line of sight and safety interlocks | drones, remote equipment |
 
-\[
-P/A = \sigma T^4,
-\]
+## What this means for the vision
 
-where \(\sigma\) is the Stefan–Boltzmann constant. For two radiative surfaces, a useful first-order net-exchange expression is proportional to
+- **Small devices** (sensors, tags): ambient energy is already enough - fully autonomous today.
+- **Phones and wearables**: ambient solar gives ≈12-17% in Radiocity's simulations; short-range beamed power gives the rest.
+- **Cars**: a 5 m² solar skin gives ≈21-28 km/day in Nigerian cities - about 40-50% of a 40 km commute. Ambient radio adds essentially nothing (milliwatt-hours per year). Electrified lanes or wireless pads close the gap.
+- **Indoor machines**: almost no sunlight indoors; beamed power or waste heat is required.
+- **Hot-process machinery**: waste heat can fully power co-located equipment.
 
-\[
-q_{net} = \sigma F_{12}(T_1^4-T_2^4),
-\]
+## Open frontiers - research targets, not boundaries
 
-before spectral, angular, and material corrections.
+Physics allows all of these; they are where Radiocity can push:
 
-Therefore, harvesting from a warm object cannot continuously produce more energy than the available net radiative flux without another energy source or a change in the thermodynamic boundary conditions.
+1. **Near-field thermophotovoltaics** - nanometre gaps exceed far-field blackbody transfer, raising power density (Fiorino et al., 2018; Mittapally et al., 2021). The extra energy still comes from the hot source.
+2. **Air-bridge and high-reflectance TPV cells** - near-perfect reuse of sub-bandgap photons (Fan et al., 2020); in Radiocity's model this sets the efficiency ceiling.
+3. **Sky-cooling energy harvesting** - the cold night sky (outer space ≈3 K) is a usable heat sink; energy can be harvested at night from the temperature difference (Li, Buddhiraju & Fan, 2020).
+4. **Solar coatings and paints** - perovskite and organic photovoltaics that can be printed onto curved bodies.
+5. **Rectifiers for microwatt-level radio** - pushing efficiency up at -30 to -20 dBm makes ambient RF useful for more devices.
+6. **Smart infrastructure** - electrified lanes, building-wide wireless power, focused beams with safety interlocks.
+7. **Intelligent power management** - forecasting, scheduling and multi-source coordination; Radiocity's core contribution.
 
-## 3. Spectral selectivity
+## Things that are not possible, however framed
 
-A practical receiver should be modeled spectrally rather than as a generic radiation trap. Absorption, emission, reflection, transmission, and conversion efficiency depend on wavelength and angle. Kirchhoff's law links absorptivity and emissivity at thermal equilibrium for a given mode, so a perfect absorber is also an efficient emitter in that mode.
-
-## 4. Conversion limits
-
-Thermophotovoltaic systems demonstrate that thermal radiation can be converted to electricity. However, conversion is not lossless. Below-bandgap photons are not efficiently converted by a PV absorber, while excess photon energy can be lost through thermalization. Thermodynamic limits therefore remain essential.
-
-## 5. Near-field opportunity
-
-Near-field radiative transfer is a legitimate route for increasing radiative heat flux between closely spaced surfaces. Evanescent modes can produce heat transfer above the conventional far-field blackbody flux under suitable nanoscale conditions. This does **not** mean that energy is created: the additional transferred energy originates from the hot source and requires a temperature/chemical potential gradient.
-
-## 6. Consequence for the Radiocity hypothesis
-
-The strongest physically defensible research direction is not a device that "traps all radiation" or creates more energy than its sources provide. It is an **adaptive multispectral radiative-energy harvesting architecture** that:
-
-1. senses incoming spectral/thermal conditions;
-2. dynamically selects or modulates compatible absorption/conversion channels;
-3. manages receiver temperature and storage;
-4. recovers useful energy from otherwise wasted radiative/thermal flux;
-5. optionally exploits near-field coupling where the geometry permits it.
-
-The research question becomes whether adaptive spectral and thermal management can improve **net usable electrical energy, exergy utilization, power density, or lifetime** relative to a fixed architecture under realistic constraints.
-
-## 7. Model requirements before publication
-
-The current repository model contains simplified efficiency and temperature relationships. These are placeholders and must not be presented as experimentally validated material/device laws.
-
-The next model revision should use:
-
-- Planck spectral radiance;
-- wavelength-dependent emissivity/absorptivity;
-- view factors/geometric coupling;
-- radiative, conductive, and convective heat transfer;
-- temperature-dependent material/device efficiency;
-- realistic electrical storage and conversion losses;
-- explicit energy and entropy/exergy accounting;
-- measured or literature-derived parameters.
+- Running a device indefinitely on radiation from surroundings at its own temperature.
+- Extracting more energy from a beam or field than its transmitter emits.
+- Harvesting meaningful power from ambient radio far from transmitters for anything above microwatts per antenna.
 
 ## Key references
 
-- Fan, S., & Li, W. (2022). Photonics and thermodynamics concepts in radiative cooling. *Nature Photonics, 16*, 182–190.
-- Li, W., Buddhiraju, S., & Fan, S. (2020). Thermodynamic limits for simultaneous energy harvesting from the hot sun and cold outer space. *Light: Science & Applications, 9*, 68.
-- Mittapally, R., et al. (2021). Near-field thermophotovoltaics for efficient heat to electricity conversion at high power density. *Nature Communications, 12*, 4364.
-- Fiorino, A., et al. (2018). Nanogap near-field thermophotovoltaics. *Nature Nanotechnology, 13*, 806–811.
-- Fan, D., et al. (2020). Near-perfect photon utilization in an air-bridge thermophotovoltaic cell. *Nature, 586*, 237–241.
-
-These references are starting points for the formal literature review; the paper would later use APA style.
+See [REFERENCES.md](REFERENCES.md).

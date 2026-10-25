@@ -1,4 +1,4 @@
-name: Tests and Radiocity Experiments
+name: Tests
 
 on:
   push:
@@ -10,42 +10,24 @@ permissions:
   contents: read
 
 jobs:
-  test-and-experiments:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - name: Install package and test dependencies
+          python-version: "3.12"
+          cache: pip
+      - name: Install
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e .
-          python -m pip install pytest
-      - name: Run test suite with diagnostics
-        env:
-          PYTHONPATH: src
+          pip install -r requirements-dev.txt
+      - name: Lint
+        run: flake8 .
+      - name: Test
+        run: pytest -q
+      - name: Experiments (quick)
+        run: python scripts/run_experiments.py --quick
+      - name: Dashboard loads
         run: |
-          set +e
-          python -m pytest -vv --tb=long 2>&1 | tee pytest.log
-          status=${PIPESTATUS[0]}
-          exit "$status"
-      - name: Run TPV temperature-bandgap map
-        if: success()
-        env:
-          PYTHONPATH: src
-        run: python scripts/tpv_temperature_bandgap_map.py
-      - name: Upload diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: radiocity-ci-diagnostics
-          path: pytest.log
-      - name: Upload TPV map
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tpv-temperature-bandgap-map
-          path: results/tpv_temperature_bandgap_map.csv
+          python -c "from streamlit.testing.v1 import AppTest; at = AppTest.from_file('streamlit_app.py', default_timeout=300).run(); assert not at.exception, at.exception"

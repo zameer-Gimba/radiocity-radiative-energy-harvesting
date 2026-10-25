@@ -4,16 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "radiocity"
-version = "0.1.0"
-description = "Physics-constrained multi-source radiative energy harvesting, optimization, storage, and distribution simulation"
-requires-python = ">=3.10"
+version = "1.0.0"
+description = "Energy autonomy from invisible energy: harvest sunlight, radio, heat and beamed power; store, regulate and manage it for any device"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Muhammad Ibrahim Gimba" }]
 dependencies = [
-  "numpy>=1.24",
-  "lightgbm>=4.0",
+  "numpy>=2.0",
+  "pandas>=2.2",
+  "lightgbm>=4.5",
 ]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.40", "plotly>=5.24"]
+dev = ["pytest>=8", "flake8>=7"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
