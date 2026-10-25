@@ -15,7 +15,7 @@ Hourly inputs for one year:
 
 ## 2. Harvesters (`harvesters.py`)
 
-**Solar PV.** P = G · A · f · η_STC · [1 + γ(T_cell − 25 °C)] · η_sys, with T_cell = T_air + (NOCT − 20)/800 · G (NOCT model; Duffie & Beckman, 2013). Defaults: η_STC = 22%, γ = −0.4 %/K, NOCT = 45 °C, η_sys = 92% (MPPT, wiring). f is an exposure/orientation factor (e.g. 0.85 for a car body, 0.15 for a phone mostly in a pocket).
+**Solar PV.** P = G · A · f · η_opt · η_STC · [1 + γ(T_cell − 25 °C)] · η_sys, with T_cell = T_air + (NOCT − 20)/800 · G (NOCT model; Duffie & Beckman, 2013). Defaults: η_STC = 22%, γ = −0.4 %/K, NOCT = 45 °C, η_opt = 97% (reflection at low sun angles), η_sys = 92% (MPPT, wiring). Validated against PVGIS: see `results/VALIDATION.md`. f is an exposure/orientation factor (e.g. 0.85 for a car body, 0.15 for a phone mostly in a pocket).
 
 **Rectenna (ambient RF).** Captured P_in = S · A_e per element with A_e = Gλ²/4π. Rectifier efficiency η(P_in) = η_max / (1 + exp(−(P_dBm − P½)/s)), η_max = 70%, P½ = −12 dBm, s = 5 dB: an adjustable logistic fit to the documented collapse of diode efficiency at low input power (Valenta & Durgin, 2014). Arrays rectify per element.
 

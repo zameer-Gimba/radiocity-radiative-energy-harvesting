@@ -71,10 +71,12 @@ class Harvester:
 class SolarPV(Harvester):
     """Photovoltaic surface (panel, roof, coating).
 
-    P = G * A * f_orient * eta_stc * [1 + gamma (T_cell - 25)] * eta_system
+    P = G * A * f_orient * eta_optical * eta_stc * [1 + gamma (T_cell - 25)] * eta_system
 
     Cell temperature uses the NOCT model:
     T_cell = T_air + (NOCT - 20) / 800 * G.
+    eta_optical covers reflection at low sun angles (angle-of-incidence
+    loss, ~3% annually for a horizontal module in PVGIS).
     """
 
     name: str
@@ -84,6 +86,7 @@ class SolarPV(Harvester):
     noct_c: float = 45.0
     orientation_factor: float = 1.0
     system_efficiency: float = 0.92
+    optical_efficiency: float = 0.97
     kind: str = "ambient"
 
     def __post_init__(self) -> None:
@@ -93,6 +96,7 @@ class SolarPV(Harvester):
             (self.efficiency_stc, "efficiency_stc"),
             (self.orientation_factor, "orientation_factor"),
             (self.system_efficiency, "system_efficiency"),
+            (self.optical_efficiency, "optical_efficiency"),
         ]:
             _fraction(value, label)
 
@@ -106,7 +110,7 @@ class SolarPV(Harvester):
         cell_c = self.cell_temperature_c(irradiance, conditions.get("air_temperature_c", 25.0))
         derate = max(0.0, 1.0 + self.temperature_coefficient_per_k * (cell_c - 25.0))
         efficiency = min(self.efficiency_stc * derate, self.efficiency_stc)
-        return irradiance * self.area_m2 * efficiency * self.system_efficiency
+        return irradiance * self.area_m2 * self.optical_efficiency * efficiency * self.system_efficiency
 
 
 # ------------------------------------------------------------------------ RF

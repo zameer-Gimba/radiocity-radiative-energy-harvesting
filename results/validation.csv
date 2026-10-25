@@ -1,0 +1,11 @@
+check,radiocity,reference,difference,kind
+Blackbody power at 300 K,459 W/m²,"459 W/m² (Stefan-Boltzmann law, exact)",0.00%,Exact physical law
+Blackbody power at 1000 K,"56,704 W/m²","56,704 W/m² (Stefan-Boltzmann law, exact)",0.00%,Exact physical law
+Blackbody power at 1500 K,"287,063 W/m²","287,063 W/m² (Stefan-Boltzmann law, exact)",0.00%,Exact physical law
+"Yearly solar yield, Abuja (1 kW horizontal, 8% system loss)","1,534 kWh","1,594 kWh (PVGIS 5.3, SARAH-3 satellite data 2005-2023)",-3.8%,"Independent model, different weather data"
+"Yearly solar yield, Lagos (1 kW horizontal, 8% system loss)","1,401 kWh","1,489 kWh (PVGIS 5.3, SARAH-3 satellite data 2005-2023)",-5.9%,"Independent model, different weather data"
+"Yearly solar yield, Kano (1 kW horizontal, 8% system loss)","1,686 kWh","1,817 kWh (PVGIS 5.3, SARAH-3 satellite data 2005-2023)",-7.2%,"Independent model, different weather data"
+"Yearly solar yield, Port Harcourt (1 kW horizontal, 8% system loss)","1,261 kWh","1,357 kWh (PVGIS 5.3, SARAH-3 satellite data 2005-2023)",-7.1%,"Independent model, different weather data"
+"Best heat-to-electricity (TPV) efficiency, ~2400 K source",37.8% (bandgap 0.92 eV),"~40% measured (LaPotin et al., Nature 2022; 1.0-1.4 eV cells, ~2000-2400 °C emitters)",-5%,Published measurement
+"Wireless charging pad, end-to-end efficiency (aligned)",89%,≥85% efficiency target for aligned wireless EV charging (SAE J2954),meets target,Industry standard
+Radio rectifier efficiency at 0 / -10 / -20 / -30 dBm input,64% / 42% / 12% / 2%,"Falls from tens of % near 0 dBm to a few % at -30 dBm (survey: Valenta & Durgin, 2014)",same trend; calibrate to a specific rectifier,Published survey (qualitative)

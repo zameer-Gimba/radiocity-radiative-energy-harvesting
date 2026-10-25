@@ -17,7 +17,7 @@ from radiocity.harvesters import (
 
 
 def test_solar_at_standard_conditions_is_close_to_rated():
-    panel = SolarPV("p", area_m2=1.0, efficiency_stc=0.20, system_efficiency=1.0, noct_c=20.0)
+    panel = SolarPV("p", area_m2=1.0, efficiency_stc=0.20, system_efficiency=1.0, optical_efficiency=1.0, noct_c=20.0)
     # NOCT = 20 C means the cell stays at air temperature: exactly rated output.
     assert panel.power_w({"ghi_w_m2": 1000.0, "air_temperature_c": 25.0}) == pytest.approx(200.0)
 

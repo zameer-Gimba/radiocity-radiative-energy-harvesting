@@ -27,7 +27,9 @@ jobs:
       - name: Test
         run: pytest -q
       - name: Experiments (quick)
-        run: python scripts/run_experiments.py --quick
+        run: |
+          python scripts/run_experiments.py --quick
+          python scripts/validate.py
       - name: Dashboard loads
         run: |
           python -c "from streamlit.testing.v1 import AppTest; at = AppTest.from_file('streamlit_app.py', default_timeout=300).run(); assert not at.exception, at.exception"
